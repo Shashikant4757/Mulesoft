@@ -12,10 +12,10 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	<sfdc-marketing-cloud:config name="Salesforce_Marketing_Cloud_Config" doc:name="Salesforce Marketing Cloud Config" doc:id="ddf91ed8-f6be-4c44-b1c9-4d311c58e63c" >
-		<sfdc-marketing-cloud:basic-connection username="narendra.sasanapuri@girikon.com" password="Nare@1234" serviceUrl="https://mc97sb5jfx5jwlk8yysdds5268h1.soap.marketingcloudapis.com/Service.asmx" />
+		<sfdc-marketing-cloud:basic-connection username="username" password="password" serviceUrl="valid soap url" />
 	</sfdc-marketing-cloud:config>
 	<cdata-salesforcepardot:config name="CData_Salesforce_Pardot_Config" doc:name="CData Salesforce Pardot Config" doc:id="8ffef125-6fa4-44ab-a0fa-aafb801d7198" >
-		<cdata-salesforcepardot:connection Password="Thechampishere#123" User="Niraj.Shukla@girikon.com" UserKey="01af5ba9e280fadcc07059ef33a5a452" ApiVersion="UNDEFINED"/>
+		<cdata-salesforcepardot:connection Password="valid password" User="valid username" UserKey="valid userkey" ApiVersion="UNDEFINED"/>
 	</cdata-salesforcepardot:config>
 	
 	<flow name="MarketingFlow" doc:id="28abd057-66db-48e4-a320-391d8d74a1c9" >
@@ -40,7 +40,7 @@ payload]]></ee:set-payload>
 output application/json
 ---
 payload map ( payload01 , indexOfPayload01 ) -> {
-	"CustomerKey": "3EEDC4D5-2085-4733-9C4F-3CD503FF6757",
+	"CustomerKey": "marketing cloud customer key",
 	Properties: {
 		Property: [{
 			"Name": "Name",
