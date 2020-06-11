@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:cdata-salesforcepardot="http://www.mulesoft.org/schema/mule/cdata-salesforcepardot"
+	xmlns:sfdc-marketing-cloud="http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud/current/mule-sfdc-marketing-cloud.xsd
+http://www.mulesoft.org/schema/mule/cdata-salesforcepardot http://www.mulesoft.org/schema/mule/cdata-salesforcepardot/current/mule-cdata-salesforcepardot.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d6420ff0-9e2b-45ae-9297-75045807656e" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<sfdc-marketing-cloud:config name="Salesforce_Marketing_Cloud_Config" doc:name="Salesforce Marketing Cloud Config" doc:id="ddf91ed8-f6be-4c44-b1c9-4d311c58e63c" >
+		<sfdc-marketing-cloud:basic-connection username="narendra.sasanapuri@girikon.com" password="Nare@1234" serviceUrl="https://mc97sb5jfx5jwlk8yysdds5268h1.soap.marketingcloudapis.com/Service.asmx" />
+	</sfdc-marketing-cloud:config>
+	<cdata-salesforcepardot:config name="CData_Salesforce_Pardot_Config" doc:name="CData Salesforce Pardot Config" doc:id="8ffef125-6fa4-44ab-a0fa-aafb801d7198" >
+		<cdata-salesforcepardot:connection Password="Thechampishere#123" User="Niraj.Shukla@girikon.com" UserKey="01af5ba9e280fadcc07059ef33a5a452" ApiVersion="UNDEFINED"/>
+	</cdata-salesforcepardot:config>
+	
+	<flow name="MarketingFlow" doc:id="28abd057-66db-48e4-a320-391d8d74a1c9" >
+		<http:listener doc:name="Listener" doc:id="04f0c400-e99c-477c-aa44-27ce20d0d7cb" config-ref="HTTP_Listener_config" path="/pardot" allowedMethods="GET"/>
+		<cdata-salesforcepardot:select doc:name="Select" doc:id="a860efe8-0056-488c-a740-414d99c6f42f" config-ref="CData_Salesforce_Pardot_Config">
+			<cdata-salesforcepardot:query ><![CDATA[SELECT * FROM Prospects]]></cdata-salesforcepardot:query>
+		</cdata-salesforcepardot:select>
+		<ee:transform doc:name="Transform Message" doc:id="c3e761db-fcbc-4252-8d3f-c82ca9a1f428" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="85840d5b-3035-445a-82f4-78ef55714f2c" name="Marketing"/>
+	</flow>
+	<sub-flow name="Marketing" doc:id="3b551f1e-a1de-49ed-99a7-04c132b1ff5a" >
+		<ee:transform doc:name="Transform Message" doc:id="d66c471c-905e-4c56-a07b-d9afbcdf5900" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	"CustomerKey": "3EEDC4D5-2085-4733-9C4F-3CD503FF6757",
+	Properties: {
+		Property: [{
+			"Name": "Name",
+			Value: payload01.FirstName
+		},
+		{
+			"Name": "Email",
+			Value: payload01.Email
+		},
+		{
+			"Name": "State",
+			Value: payload01.State
+		},
+		{
+			"Name": "Id",
+			Value: payload01.Id as String
+		}]
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<sfdc-marketing-cloud:upsert doc:name="Upsert entities" doc:id="747d754c-f8d5-4129-aa05-7e64503ccf7e" config-ref="Salesforce_Marketing_Cloud_Config" objectType="DataExtensionObject">
+		</sfdc-marketing-cloud:upsert>
+		<ee:transform doc:name="Transform Message" doc:id="997e6527-14ad-49aa-8666-a983854823f8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>
